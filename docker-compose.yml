@@ -1,0 +1,56 @@
+services:
+  # NOTE: Endee service commented out - install locally or build from source
+  # See: https://github.com/EndeeLabs/endee
+  # Uncomment when Endee image is available
+  # endee:
+  #   image: endeeio/endee:latest
+  #   container_name: endee-server
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     - ENDEE_PORT=8080
+  #     - ENDEE_AUTH_MODE=open
+  #   volumes:
+  #     - endee_data:/data
+  #   networks:
+  #     - rag-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fastapi-server
+    ports:
+      - "8000:8000"
+    environment:
+      - ENDEE_HOST=localhost
+      - ENDEE_PORT=8080
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - LLM_MODEL=gpt-3.5-turbo
+    volumes:
+      - ./backend:/app
+    networks:
+      - rag-network
+    command: python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: react-app
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - rag-network
+    command: npm run dev
+
+volumes:
+  endee_data:
+
+networks:
+  rag-network:
+    driver: bridge

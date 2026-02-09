@@ -6,7 +6,7 @@ services:
     # the build will fail; in that case follow the README instructions to build Endee
     # locally and set ENDEE_HOST to the running service.
     build:
-      context: https://github.com/EndeeLabs/endee.git
+      context: ./third_party/endee
       dockerfile: Dockerfile
     container_name: endee-server
     ports:
